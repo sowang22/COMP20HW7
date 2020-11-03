@@ -1,0 +1,242 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Jade Delight</title>
+<script
+  src="https://code.jquery.com/jquery-3.5.1.min.js"
+  integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+  crossorigin="anonymous">
+</script>
+</head>
+
+<body>
+<script language="javascript">
+
+function MenuItem(name, cost)
+{
+	this.name = name;
+	this.cost=cost;
+}
+
+menuItems = new Array(
+	new MenuItem("Chicken Chop Suey", 4.5),
+	new MenuItem("Sweet and Sour Pork", 6.25),
+	new MenuItem("Shrimp Lo Mein", 5.25),
+	new MenuItem("Moo Shi Chicken", 6.5),
+	new MenuItem("Fried Rice", 2.35)
+);
+
+function makeSelect(name, minRange, maxRange)
+{
+	var t= "";
+	t = "<select name='" + name + "' size='1'>";
+	for (j=minRange; j<=maxRange; j++)
+	   t += "<option>" + j + "</option>";
+	t+= "</select>"; 
+	return t;
+}
+</script>
+
+<h1>Jade Delight</h1>
+<form>
+
+<p>First Name: <input type="text"  name='fname' /></p>
+<p>Last Name*:  <input type="text"  name='lname' /></p>
+<p>Street: <input type="text"  name='street' /></p>
+<p>City: <input type="text"  name='city' /></p>
+<p>Phone*: <input type="text"  name='phone' /></p>
+<p> 
+	<input type="radio"  name="p_or_d" value = "pickup" checked="checked"/>Pickup  
+	<input type="radio"  name='p_or_d' value = 'delivery'/>
+	Delivery
+</p>
+<table border="0" cellpadding="3">
+  <tr>
+    <th>Select Item</th>
+    <th>Item Name</th>
+    <th>Cost Each</th>
+    <th>Total Cost</th>
+  </tr>
+<script language="javascript">
+
+  var s = "";
+  for (i=0; i< menuItems.length; i++)
+  {
+	  s += "<tr><td>";
+	  s += makeSelect("quan" + i, 0, 10);
+	  s += "</td><td>" + menuItems[i].name + "</td>";
+	  s += "<td> $ " + menuItems[i].cost.toFixed(2) + "</td>";
+	  s += "<td>$<input type='text' name='cost'/></td></tr>";
+  }
+  document.writeln(s);
+</script>
+</table>
+<p>Subtotal: 
+   $<input type="text"  name='subtotal' id="subtotal" />
+</p>
+<p>Mass tax 6.25%:
+  $ <input type="text"  name='tax' id="tax" />
+</p>
+<p>Total: $ <input type="text"  name='total' id="total" />
+</p>
+
+<input type = "submit" value = "Submit Order" />
+
+</form>
+
+<script>
+	$(document).ready(function() {
+		var indivCosts = [0,0,0,0,0];
+
+		$('[name="street"]').hide();
+        $('[name="city"]').hide();
+        $('input[name="street"]').parent().css("display", "none");
+        $('input[name="city"]').parent().css("display", "none");
+
+		$('[value="delivery"]').click(function(){
+			$('[name="street"]').show();
+			$('[name="city"]').show(); 
+			$('input[name="street"]').parent().css("display", "block");
+        	$('input[name="city"]').parent().css("display", "block");
+		})
+
+		$('[value="pickup"]').click(function(){
+			$('[name="street"]').hide();
+        	$('[name="city"]').hide();
+        	$('input[name="street"]').parent().css("display", "none");
+        	$('input[name="city"]').parent().css("display", "none"); 
+		})
+
+	    $('[name="quan0"]').change(function() {
+            indivCosts[0] = 4.50 * parseInt(jQuery(this).val());
+            document.getElementsByName("cost")[0].value = indivCosts[0].toFixed(2);
+            total(indivCosts);
+        })
+
+        $('[name="quan1"]').change(function() {
+            indivCosts[1] = 6.25 * parseInt(jQuery(this).val());
+            document.getElementsByName("cost")[1].value = indivCosts[1].toFixed(2);
+            total(indivCosts);
+        })
+
+        $('[name="quan2"]').change(function() {
+            indivCosts[2] = 5.25 * parseInt(jQuery(this).val());
+            document.getElementsByName("cost")[2].value = indivCosts[2].toFixed(2);
+            total(indivCosts);
+        })
+
+        $('[name="quan3"]').change(function() {
+            indivCosts[3] = 6.50 * parseInt(jQuery(this).val());
+            document.getElementsByName("cost")[3].value = indivCosts[3].toFixed(2);
+            total(indivCosts);
+        })
+
+        $('[name="quan4"]').change(function() {
+            indivCosts[4] = 2.35 * parseInt(jQuery(this).val());
+            document.getElementsByName("cost")[4].value = indivCosts[4].toFixed(2);
+            total(indivCosts);
+        })
+
+		$(":submit").click(function() {
+            validate(indivCosts);
+        })
+	});
+
+	function total(indivCosts) {
+		var subtotal = 0;
+		for (i = 0; i < indivCosts.length; i++)
+		{
+			subtotal += indivCosts[i];
+		}
+		$("#subtotal").val(subtotal.toFixed(2));
+
+		var tax = subtotal * .0625;
+		$("#tax").val(tax.toFixed(2));
+
+		var total = subtotal + tax;
+		$("#total").val(total.toFixed(2));
+	}
+
+	function validate(indivCosts){
+		var valid = true; 
+		var orderType; 
+		var lastName = $('[name="lname"]').val();
+        if (lastName == "") {
+        	alert("Please enter valid last name.");
+			valid = false; 
+        } 
+
+		var phoneNum; 
+		phoneNum = $("[name='phone']").val();
+		if (phoneNum.length != 10){
+			alert("Please enter valid phone number.");
+			valid = false; 
+		}
+
+		if (!($('input[value="pickup"]').prop("checked"))) {
+			var street = $('[name="street"]').val();
+            if (street == "") 
+            {
+                alert("Please enter valid street.");
+                valid = false;
+        	}		
+            var city = $('[name="city"]').val();
+            if (city == "") {
+            	alert("Please enter valid city.");
+                valid = false;
+            }
+            orderType = 1; 
+		} else {
+			orderType = 2; 
+		}
+
+		if (valid == true) {
+			placeOrder(orderType, indivCosts); 
+		}	 
+	}
+
+	function placeOrder(orderType, indivCosts){
+		var d = new Date();
+		var hour = d.getHours();
+		var min = d.getMinutes();
+
+		if (orderType == 1) {
+			min += 30; 
+		} else {
+			min += 15;  
+		}
+
+		if (min >= 60){
+			hour++; 
+			if (hour == 24){
+				hour = 0; 
+			}
+			min -= 60; 
+			if (min < 10) {
+				min = "0" + min; 
+			}
+		}
+
+		var ccs = indivCosts[0] / 4.50; 
+		var ssp = indivCosts[1] / 6.25;
+		var slm = indivCosts[2] / 5.25;
+		var msc = indivCosts[3] / 6.5;
+		var fr = indivCosts[4] / 2.35;
+		var food = ccs + " Chicken Chop Suey <br />" + ssp + " Sweet and Sour Pork <br />" + 
+				   slm + " Shrimp Lo Mein <br />" + msc + " Moo Shi Chicken <br />" + 
+				   fr + " Fried Rice <br />"; 
+		var orderPage = window.open("");
+		orderPage.document.write("<html><head><title>Your Order</title></head><body>");
+		orderPage.document.write("<h1> YOUR ORDER </h1> <br/>");
+		orderPage.document.write("<p>Thank you for dining with us. Here are your order details:</p>");
+		orderPage.document.write(food);
+		orderPage.document.write("<p> It will be ready at " + hour + ":" + min + ".<br/>");
+		orderPage.document.write("<p> Enjoy your food!<p>");
+		orderPage.document.write("</body></html>");
+
+	}
+
+</script>
+</body>
+</html>
